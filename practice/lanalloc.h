@@ -10,6 +10,7 @@
 
 using namespace std;
 
+
 namespace LAN {
 
     template <class T>
@@ -49,7 +50,7 @@ namespace LAN {
         typedef size_t        size_type;
         typedef ptrdiff_t     diff_type;
         // typedef value_type*   iterator;
-        
+
         template <class U>
         // don't know the meaning
         struct rebind {
@@ -78,7 +79,6 @@ namespace LAN {
             return size_type(UINT_MAX/sizeof(T));
         }
         
-        // void push_back(const T& x);
     };
 
 }

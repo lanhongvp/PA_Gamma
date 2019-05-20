@@ -18,9 +18,9 @@ int main() {
         v.push_back(val);
     }
 
-    // for(int i=0;i<v.size();i++) {
-    //     cout << v[i] << " ";
-    // }
+    for(int i=0;i<v.size();i++) {
+        cout << v[i] << " ";
+    }
     // cout << "TEST ON DEQUE" << endl;
     // deque<int,LAN::allocator<int>> dq;
     // for(int i=0;i<cap;i++) {

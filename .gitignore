@@ -30,3 +30,9 @@
 *.exe
 *.out
 *.app
+
+# Vscode
+*.vscode/
+practice/.vscode/*
+p1/*
+*.zip

@@ -380,8 +380,9 @@ protected:
 
 ### 4.4 deque
 vector是单向开口的连续线性空间，deque是一种双向开口的连续线性空间
+- deque和vector的最大差异：一在于deque允许于常数时间内对起头端进行元素的插入或移除，二在于deque没有所谓的容量概念，因为其是动态以分段连续空间组合而成
 #### 4.4.2 deque中控器
-deque是连续空间，deque采用一块map(一小块连续空间)作为主控，map中的每个元素都是指针，指向另一段(较大的)连续现行空间，称为缓冲区
+deque是连续空间，deque采用一块map(一小块连续空间)作为主控，map中的每个元素都是指针，指向另一段(较大的)连续现行空间，称为缓冲区。缓冲区才是deque的存储空间主体
 ```cpp
 template <class T,class Alloc=alloc,size_t BufSize=0>
 class deque {
@@ -400,12 +401,39 @@ protected:
 };
 ```
 #### 4.4.3 deque的迭代器
+- 首先必须能够指出分段连续空间在哪里
+- 其次必须能够判断自己是否已经处于所在缓冲区的边缘
 deque是分段连续空间，维持其整体连续的任务落在了迭代器operator++和operator--两个运算子身上
 - 理解deque中控器、缓冲区、迭代器的相互关系
+- deque迭代器的关键行为
+```cpp
+void set_node(map_pointer new_node) {
+    node = new_node;
+    first = *new_node;
+    last = first + difference_type(buffer_size());
+}
+
+//以下各个重载运算子是__deque_iterator<>成功运作的关键
+reference operator*() const {return *cur; }
+pointer operator->() const {return &(operator*()); }
+...
+
+```
 #### 4.4.4 deque数据结构
 - deque除了维护一个先前说过的指向map的指针外，也维护start,finish连个迭代器，分别指向第一缓冲区的第一个元素和最后缓冲区的最后一个元素(的下一个位置)
 - 记住当前map的大小，一旦map所提供的节点不足，须重新配置更大的一块map
+
 #### 4.4.5 deque的构造与内存管理 ctor,push_back,push_front
+- 思考：什么时候map需要重新整治
+    - `reserve_map_at_back()`和`reserve_map_at_front()`
+#### 4.4.6 deque的元素操作
+### 4.5 stack
+#### 4.5.2 stack定义完整列表
+- deque是双向开口的数据结构，若以deque为底部结构并封闭其头端开口，即可实现一个stack
+#### 4.5.3 stack没有迭代器
+stack所有元素的进出必须符合“先进后出”的条件，只有stack顶端的元素，才有机会被外界取用。stack不提供走访功能，也不提供迭代器
+### 4.6 queue
+### 4.7 heap
 
 # Realization
 

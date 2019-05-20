@@ -13,10 +13,11 @@ using namespace std;
 
 namespace LAN {
 
-    template <class T>
+    template <class T>  //typename
     inline T* _allocate(ptrdiff_t size,T*) {
         set_new_handler(0);
-        T* tmp = (T*)(::operator new((size_t)(size* sizeof(T))));
+        // :: 调用全局new 
+        T* tmp = (T*)(::operator new((size_t)(size*sizeof(T))));
         if(tmp==0) {
             cerr << "out of memory" << endl;
             exit(1);
@@ -31,7 +32,7 @@ namespace LAN {
 
     template <class T1,class T2> 
     inline void _construct(T1* p,const T2 & val) {
-        new(p) T1(val);
+        new(p) T1(val);  //在程序员指定的空间里new,同时调用拷贝构造函数
     }
 
     template <class T>

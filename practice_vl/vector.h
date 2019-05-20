@@ -21,14 +21,22 @@ public:
     typedef typename allocator_type::reference         reference;
 
     typedef value_type*                 iterator;
+
+    allocator_type get_allocator() { return data_allocator(); }
+
 private:
     iterator        begin_;
     iterator        end_;
-    iterator        cap_;      
+    iterator        cap_;     
+    allocator_type  allocator_; 
+    size_type       len_;        
 
 public:
     //construct
     vector(size_type n,const value_type& value) {
+        begin_ = allocator_.allocate(2*n);
+        end_ = begin_ + n;
+        cap_ = end_ + n;
         fill_init(n,value);
     }
     //deconstruct
@@ -45,49 +53,60 @@ public:
         return *(begin_+ n);
     }
 
+    size_type size() const {
+        return static_cast<size_type>(len_);
+    }
+
 private:
     // some helper functions
     void fill_init(size_type n,const value_type& value);
-    void destroy_v(iterator first,iterator last,size_type n);
+    void destroy_v(pointer first,pointer last,size_type n);
 
 };
 
 // fill_init
 template <class T>
 void vector<T>:: fill_init(size_type n, const value_type& value) {
+    len_ = n;
     fill_n(begin_,n,value);
 }
 
 template <class iter,class size,class T>
 iter fill_n(iter first,size n,const T& val) {
+    //len_ = 0;
     for(;n>0;--n,++first) {
         *first = val;
+      //  len_++;
     }
     return first;
 }
 
 // destroy_v
 template <class T>
-void vector<T>:: destroy_v(iterator first,iterator last,size_type n) {
-    data_allocator::destroy(first,last);
-    data_allocator::deallocate(first,n);
+void vector<T>:: destroy_v(pointer first,pointer last,size_type n) {
+    allocator_.destroy(first,last);
+    allocator_.deallocate(first,n);
 }
 
 // push_back
-// TODO 私有变量的访问范围
 template <class T> 
 void vector<T>::push_back(const value_type& value) {
+    // std::cout << value<<" ";
     if(end_!=cap_) {
-        data_allocator::construct(lanstl::address_of(*end_),value);
+        // cout << begin_ <<" "<<cap_;
+        allocator_.construct((end_),value);
         ++end_;
+        len_ ++;
+        // cout<<end_<<" ";
     }
 }
 
 template <class T>
 void vector<T>::pop_back() {
     // TODO exception
-    data_allocator::destroy(end_ - 1);
+    allocator_.destroy(end_ - 1);
     --end_;
+    len_--;
 }
 
 }

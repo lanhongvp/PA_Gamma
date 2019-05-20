@@ -11,11 +11,6 @@ using namespace std;
 
 
 namespace lanstl {
-    // 获取对象地址
-    template <class T> 
-    constexpr T* address_of(T& val) noexcept {
-        return &val;
-    }
 
     template <class T>  //typename
     inline T* _allocate(ptrdiff_t size,T*) {
@@ -40,15 +35,14 @@ namespace lanstl {
     }
 
     template <class T>
-    inline void _destroy(T* ptr) {
+    inline void _destroy_one(T* ptr) {
         ptr->~T();
     }
 
     template <class T>
-    inline void _destroy(T* first,T* last) {
+    inline void _destroy_cat(T* first,T* last) {
         for(;first!=last;++first) {
-            //TODO overload _destroy
-            first->~T();
+            _destroy_one(&*first);
         }
     }
 
@@ -80,10 +74,12 @@ namespace lanstl {
             _construct(p,val);
         }
 
-        void destroy(pointer p) {_destroy(p);}
-        void destroy(pointer first,pointer last) {_destroy(first,last);}
+        static void destroy(T* ptr);
+        static void destroy(T* first, T* last);
+        // void destroy(pointer p) {_destroy(p);}
+        // void destroy(pointer first,pointer last) {_destroy_cat(first,last);}
         
-        // pointer address(reference x) {return (pointer)& x;}
+        pointer address(reference x) {return (pointer)& x;}
 
         // const_pointer const_address(const_reference x) {
         //     return (const_pointer)&x;
@@ -94,6 +90,18 @@ namespace lanstl {
         }
         
     };
+
+template <class T>
+void allocator<T>::destroy(T* ptr)
+{
+  _destroy_one(ptr);
+}
+
+template <class T>
+void allocator<T>::destroy(T* first, T* last)
+{
+  _destroy_cat(first, last);
+}
 
 }
 

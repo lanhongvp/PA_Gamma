@@ -2,7 +2,6 @@
 #define TINYSLT_VECTOR_H
 
 #include <initializer_list>
-#include <algorithm>
 #include "alloc.h"
 
 namespace lanstl {
@@ -21,8 +20,6 @@ public:
     typedef typename allocator_type::reference         reference;
 
     typedef value_type*                 iterator;
-
-    allocator_type get_allocator() { return data_allocator(); }
 
 private:
     iterator        begin_;
@@ -58,7 +55,7 @@ public:
     }
 
 private:
-    // some helper functions
+    // some helper functions of construct and deconstruct
     void fill_init(size_type n,const value_type& value);
     void destroy_v(pointer first,pointer last,size_type n);
 
@@ -68,6 +65,10 @@ private:
 template <class T>
 void vector<T>:: fill_init(size_type n, const value_type& value) {
     len_ = n;
+    if(n==0) {
+        cout << "Empty error" <<endl;
+        exit(1);
+    }
     fill_n(begin_,n,value);
 }
 
@@ -96,14 +97,17 @@ void vector<T>::push_back(const value_type& value) {
         // cout << begin_ <<" "<<cap_;
         allocator_.construct((end_),value);
         ++end_;
-        len_ ++;
+        len_++;
         // cout<<end_<<" ";
     }
 }
 
 template <class T>
 void vector<T>::pop_back() {
-    // TODO exception
+    if(end_== begin_) {
+        cout << "The list is empty" << endl;
+        exit(0);
+    }
     allocator_.destroy(end_ - 1);
     --end_;
     len_--;

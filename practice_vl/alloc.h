@@ -51,9 +51,9 @@ namespace lanstl {
     public:
         typedef T       value_type;
         typedef T*      pointer;
-        typedef const T*    const_pointer;
+        // typedef const T*    const_pointer;
         typedef T&      reference;
-        typedef const T&      const_reference;
+        // typedef const T&      const_reference;
         typedef size_t        size_type;
         typedef ptrdiff_t     difference_type;
         // typedef value_type*   iterator;
@@ -69,6 +69,7 @@ namespace lanstl {
         }
 
         void deallocate(pointer p,size_type n) {_deallocate(p);}
+        void deallocate(pointer p) {_deallocate(p);}
 
         void construct(pointer p,const T& val) {
             _construct(p,val);
@@ -76,14 +77,6 @@ namespace lanstl {
 
         static void destroy(T* ptr);
         static void destroy(T* first, T* last);
-        // void destroy(pointer p) {_destroy(p);}
-        // void destroy(pointer first,pointer last) {_destroy_cat(first,last);}
-        
-        pointer address(reference x) {return (pointer)& x;}
-
-        // const_pointer const_address(const_reference x) {
-        //     return (const_pointer)&x;
-        // }
 
         size_type max_size() const {
             return size_type(UINT_MAX/sizeof(T));

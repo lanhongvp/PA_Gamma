@@ -1,0 +1,42 @@
+conv1: value range 0 - 2.56802, interval 0.001253916067071259, interval num 2048, threshold num 2046
+
+res2a_branch1: value range 0 - 0.6862399, interval 0.0003350780752953142, interval num 2048, threshold num 2046
+
+res2a_branch2a: value range 0 - 0.6862399, interval 0.0003350780752953142, interval num 2048, threshold num 2046
+
+res2a_branch2b: value range 0 - 0.3954424, interval 0.00019308710761833936, interval num 2048, threshold num 1919
+
+res2b_branch2a: value range 0 - 0.64805645, interval 0.0003164338122587651, interval num 2048, threshold num 1407
+
+res2b_branch2b: value range 0 - 1.0242087, interval 0.0005001018871553242, interval num 2048, threshold num 892
+
+res3a_branch1: value range 0 - 1.0594888, interval 0.0005173285026103258, interval num 2048, threshold num 1279
+
+res3a_branch2a: value range 0 - 1.0594888, interval 0.0005173285026103258, interval num 2048, threshold num 1279
+
+res3a_branch2b: value range 0 - 0.576218, interval 0.00028135644970461726, interval num 2048, threshold num 1919
+
+res3b_branch2a: value range 0 - 0.9157032, interval 0.00044712069211527705, interval num 2048, threshold num 1279
+
+res3b_branch2b: value range 0 - 0.60247296, interval 0.0002941762504633516, interval num 2048, threshold num 1279
+
+res4a_branch1: value range 0 - 1.276608, interval 0.0006233437452465296, interval num 2048, threshold num 1407
+
+res4a_branch2a: value range 0 - 1.276608, interval 0.0006233437452465296, interval num 2048, threshold num 1407
+
+res4a_branch2b: value range 0 - 0.46102592, interval 0.00022511031420435756, interval num 2048, threshold num 1663
+
+res4b_branch2a: value range 0 - 0.82787806, interval 0.00040423733298666775, interval num 2048, threshold num 1535
+
+res4b_branch2b: value range 0 - 0.3978516, interval 0.0001942634698934853, interval num 2048, threshold num 2046
+
+res5a_branch1: value range 0 - 0.6063548, interval 0.00029607166652567685, interval num 2048, threshold num 1791
+
+res5a_branch2a: value range 0 - 0.6063548, interval 0.00029607166652567685, interval num 2048, threshold num 1791
+
+res5a_branch2b: value range 0 - 0.35948145, interval 0.00017552805365994573, interval num 2048, threshold num 2046
+
+res5b_branch2a: value range 0 - 0.6275223, interval 0.0003064073680434376, interval num 2048, threshold num 2046
+
+res5b_branch2b: value range 0 - 0.24062356, interval 0.00011749197437893599, interval num 2048, threshold num 2046
+

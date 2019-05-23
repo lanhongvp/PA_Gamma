@@ -1,0 +1,1 @@
+python caffe-int8-convert-tool-dev-weight.py --proto ../../model_param/headpose.prototxt --model ../../model_param/headpose.caffemodel --mean 103.94 116.78 123.68 --norm=0.017 --images=../../model_param/test_images/ --output=headpose.table --group 0

@@ -13,6 +13,7 @@
 // specific language governing permissions and limitations under the License.
 
 #include <stdio.h>
+#include <iostream>
 #include <algorithm>
 #include <vector>
 #include <opencv2/core/core.hpp>
@@ -24,58 +25,72 @@
 #include "gpu.h"
 #endif // NCNN_VULKAN
 
-static int detect_squeezenet(const cv::Mat& bgr, std::vector<float>& cls_scores)
+static int detect_headpose(const cv::Mat& bgr, std::vector<std::vector<float> >& hdp_scores)
 {
-    ncnn::Net squeezenet;
+    ncnn::Net headpose;
 
 #if NCNN_VULKAN
-    squeezenet.use_vulkan_compute = true;
+    headpose.use_vulkan_compute = true;
 #endif // NCNN_VULKAN
 
-    squeezenet.load_param("../src/squeezenet_v1.1.param");
-    squeezenet.load_model("../src/squeezenet_v1.1.bin");
+    std::cout << "Begin to analysis param and model " << std::endl;
+    headpose.load_param("../model_param/headpose-int8.param");
+    headpose.load_model("../model_param/headpose-int8.bin");
 
     ncnn::Mat in = ncnn::Mat::from_pixels_resize(bgr.data, ncnn::Mat::PIXEL_BGR, bgr.cols, bgr.rows, 227, 227);
 
     const float mean_vals[3] = {104.f, 117.f, 123.f};
     in.substract_mean_normalize(mean_vals, 0);
 
-    ncnn::Extractor ex = squeezenet.create_extractor();
+    ncnn::Extractor ex = headpose.create_extractor();
 
-    ex.input("data", in);
+    ex.input("blob1", in);
 
-    ncnn::Mat out;
-    ex.extract("prob", out);
+    std::vector <ncnn::Mat> out;
+    ncnn::Mat out1;
+    ncnn::Mat out2;
+    ncnn::Mat out3;
+    ex.extract("fc1", out1);
+    out.push_back(out1);
+    ex.extract("fc2", out2);
+    out.push_back(out2);
+    ex.extract("fc3", out3);
+    out.push_back(out3);
 
-    cls_scores.resize(out.w);
-    for (int j=0; j<out.w; j++)
-    {
-        cls_scores[j] = out[j];
+    int hd_angles = 3;
+    hdp_scores.resize(hd_angles);
+
+    // std::cout << "out height " << out1.h << std::endl;
+    // std::cout << "out width " << out1.w << std::endl;
+    
+    // hdp_scores[0].resize(out1.h);
+    for (int i=0; i<hd_angles; i++) {
+        hdp_scores[i].resize(out1.w);
+        for (int j=0; j<out1.w; j++)
+        {
+            hdp_scores[i][j] = out[i][j];
+            // std::cout << out[i][j] << " ";
+        }
+        // std::cout << std::endl;
     }
-
+    std::cout << "Param and model loaded" << std::endl;
+    
     return 0;
 }
 
-static int print_topk(const std::vector<float>& cls_scores, int topk)
+static int print_hdpscores(const std::vector<std::vector<float> >& hdp_scores)
 {
     // partial sort topk with index
-    int size = cls_scores.size();
-    std::vector< std::pair<float, int> > vec;
-    vec.resize(size);
-    for (int i=0; i<size; i++)
-    {
-        vec[i] = std::make_pair(cls_scores[i], i);
-    }
+    int hd_angles = hdp_scores.size();
+    int hd_dims = hdp_scores[0].size();
 
-    std::partial_sort(vec.begin(), vec.begin() + topk, vec.end(),
-                      std::greater< std::pair<float, int> >());
-
-    // print topk and score
-    for (int i=0; i<topk; i++)
-    {
-        float score = vec[i].first;
-        int index = vec[i].second;
-        fprintf(stderr, "%d = %f\n", index, score);
+    // print headpose score in hd_angles
+    for(int i=0; i<hd_angles; i++) {
+        std::cout << "pose " << i << " [";
+        for(int j=0; j<hd_dims; j++) {
+            std::cout << hdp_scores[i][j] << " ";
+        }
+        std::cout << "]" << std::endl;
     }
 
     return 0;
@@ -102,14 +117,15 @@ int main(int argc, char** argv)
     ncnn::create_gpu_instance();
 #endif // NCNN_VULKAN
 
-    std::vector<float> cls_scores;
-    detect_squeezenet(m, cls_scores);
+    std::vector<std::vector<float> > hdp_scores;
+    // std::cout << "Begin to detect model " << std::endl;
+    detect_headpose(m, hdp_scores);
 
 #if NCNN_VULKAN
     ncnn::destroy_gpu_instance();
 #endif // NCNN_VULKAN
 
-    print_topk(cls_scores, 3);
+    print_hdpscores(hdp_scores);
 
     return 0;
 }

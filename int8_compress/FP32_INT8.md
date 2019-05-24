@@ -35,6 +35,7 @@
         - 特殊参数7：6=500，该层的参数量，5*5*1*20=500
 
 ## A Int8量化－介绍
+- (知乎原文链接)[https://zhuanlan.zhihu.com/p/58182172]
 ### 前言
 本系列目的：
 - **底层Int8汇编层**实现原理以及汇编性能优化手段
@@ -134,6 +135,7 @@ NCNN的`dequantize.cpp`函数里面有其去量化的实现，把卷积最后输
 #### [TODO]3.2 优化INT8实现逻辑
 
 ## B INT8量化-python实现及代码分析
+- [知乎原文链接](https://zhuanlan.zhihu.com/p/58208691)
 ### 1 量化的本质
 量化就是原信号的采样
 ### 2 校准算法流程回顾
@@ -163,9 +165,7 @@ NCNN的`dequantize.cpp`函数里面有其去量化的实现，把卷积最后输
 # Realization
 ## NCNN官方
 ### quantized int8 inference
-- [TODO] offline way and runtime way
-- [TODO] caffe2ncnn　转换出现问题
-    - caffe重新编译之后如何与ncnn以及自己的工程集合
+
 
 
 

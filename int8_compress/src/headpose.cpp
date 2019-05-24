@@ -21,23 +21,17 @@
 
 #include "platform.h"
 #include "net.h"
-#if NCNN_VULKAN
-#include "gpu.h"
-#endif // NCNN_VULKAN
 
 static int detect_headpose(const cv::Mat& bgr, std::vector<std::vector<float> >& hdp_scores)
 {
     ncnn::Net headpose;
 
-#if NCNN_VULKAN
-    headpose.use_vulkan_compute = true;
-#endif // NCNN_VULKAN
-
     std::cout << "Begin to analysis param and model " << std::endl;
     headpose.load_param("../model_param/headpose-int8.param");
     headpose.load_model("../model_param/headpose-int8.bin");
+    // std::cout << "haha" << std::endl;
 
-    ncnn::Mat in = ncnn::Mat::from_pixels_resize(bgr.data, ncnn::Mat::PIXEL_BGR, bgr.cols, bgr.rows, 227, 227);
+    ncnn::Mat in = ncnn::Mat::from_pixels_resize(bgr.data, ncnn::Mat::PIXEL_BGR, bgr.cols, bgr.rows, 224, 224);
 
     const float mean_vals[3] = {104.f, 117.f, 123.f};
     in.substract_mean_normalize(mean_vals, 0);
@@ -50,18 +44,20 @@ static int detect_headpose(const cv::Mat& bgr, std::vector<std::vector<float> >&
     ncnn::Mat out1;
     ncnn::Mat out2;
     ncnn::Mat out3;
-    ex.extract("fc1", out1);
+    ex.extract("fc_blob1", out1);
     out.push_back(out1);
-    ex.extract("fc2", out2);
+    ex.extract("fc_blob2", out2);
     out.push_back(out2);
-    ex.extract("fc3", out3);
+    ex.extract("fc_blob3", out3);
     out.push_back(out3);
 
     int hd_angles = 3;
     hdp_scores.resize(hd_angles);
 
-    // std::cout << "out height " << out1.h << std::endl;
-    // std::cout << "out width " << out1.w << std::endl;
+    std::cout << "out height " << out1.h << std::endl;
+    std::cout << "out width " << out1.w << std::endl;
+    std::cout << "out width " << out2.w << std::endl;
+    std::cout << "out width " << out3.w << std::endl;
     
     // hdp_scores[0].resize(out1.h);
     for (int i=0; i<hd_angles; i++) {
@@ -69,9 +65,9 @@ static int detect_headpose(const cv::Mat& bgr, std::vector<std::vector<float> >&
         for (int j=0; j<out1.w; j++)
         {
             hdp_scores[i][j] = out[i][j];
-            // std::cout << out[i][j] << " ";
+            std::cout << out[i][j] << " ";
         }
-        // std::cout << std::endl;
+        std::cout << std::endl;
     }
     std::cout << "Param and model loaded" << std::endl;
     
@@ -83,7 +79,7 @@ static int print_hdpscores(const std::vector<std::vector<float> >& hdp_scores)
     // partial sort topk with index
     int hd_angles = hdp_scores.size();
     int hd_dims = hdp_scores[0].size();
-
+    std::cout << "xixi" << std::endl;
     // print headpose score in hd_angles
     for(int i=0; i<hd_angles; i++) {
         std::cout << "pose " << i << " [";
@@ -113,19 +109,12 @@ int main(int argc, char** argv)
         return -1;
     }
 
-#if NCNN_VULKAN
-    ncnn::create_gpu_instance();
-#endif // NCNN_VULKAN
-
     std::vector<std::vector<float> > hdp_scores;
-    // std::cout << "Begin to detect model " << std::endl;
+    std::cout << "Begin to detect model " << std::endl;
     detect_headpose(m, hdp_scores);
-
-#if NCNN_VULKAN
-    ncnn::destroy_gpu_instance();
-#endif // NCNN_VULKAN
-
+    
+    std::cout << "print headpose" << std::endl;
     print_hdpscores(hdp_scores);
 
-    return 0;
+    // return 0;
 }

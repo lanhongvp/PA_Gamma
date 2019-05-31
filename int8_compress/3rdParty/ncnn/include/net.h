@@ -106,25 +106,11 @@ public:
 
 #if NCNN_VULKAN
 
-    void set_vulkan_device(const VulkanDevice* vkdev);
+    void set_vulkan_device(VulkanDevice* vkdev);
 
 #endif // NCNN_VULKAN
 
 protected:
-    // parse the structure of network
-    // fuse int8 op dequantize and quantize by requantize
-    void fuse_network();
-
-#if NCNN_VULKAN
-
-    int upload_model();
-
-    int create_pipeline();
-
-    int destroy_pipeline();
-
-#endif // NCNN_VULKAN
-
     friend class Extractor;
 #if NCNN_STRING
     int find_blob_index_by_name(const char* name) const;
@@ -136,7 +122,7 @@ protected:
     int forward_layer(int layer_index, std::vector<Mat>& blob_mats, Option& opt) const;
 
 #if NCNN_VULKAN
-    int forward_layer(int layer_index, std::vector<Mat>& blob_mats, std::vector<VkMat>& blob_mats_gpu, VkCompute& cmd, Option& opt) const;
+    int forward_layer(int layer_index, std::vector<VkMat>& blob_mats, std::vector<int>& wait_barrier_counts, VkCompute& cmd, Option& opt) const;
 #endif // NCNN_VULKAN
 
 protected:
@@ -146,16 +132,10 @@ protected:
     std::vector<layer_registry_entry> custom_layer_registry;
 
 #if NCNN_VULKAN
-    const VulkanDevice* vkdev;
-    const VulkanDevice* vkdev_local;
+    VulkanDevice* vkdev;
 
     VkAllocator* weight_vkallocator;
     VkAllocator* weight_staging_vkallocator;
-
-    ncnn::Layer* cast_float32_to_float16;
-    ncnn::Layer* cast_float16_to_float32;
-    ncnn::Layer* packing_pack1;
-    ncnn::Layer* packing_pack4;
 #endif // NCNN_VULKAN
 };
 
@@ -237,6 +217,9 @@ private:
 
 #if NCNN_VULKAN
     std::vector<VkMat> blob_mats_gpu;
+
+    // the barrier count must be hit before reclaiming buffer memory alias-able
+    std::vector<int> wait_barrier_counts;
 #endif // NCNN_VULKAN
 };
 

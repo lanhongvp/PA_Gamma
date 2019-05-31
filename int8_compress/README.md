@@ -19,6 +19,6 @@
     - 得到`headpose.table`，作为`ncnn`中`caffe2ncnn`的量化校准系数输入
 ### 2 tools
 - 运行`sh convert.sh`
-    - 得到经过INT8量化的`heapose.param`和`headpose.bin`
+    - 得到经过INT8量化的`heapose-int8.param`和`headpose-int8.bin`
 ### 3 src
 - 整体编译后，运行`./headpose test.jpg`，运用ncnn进行前传，对比量化前后的结果

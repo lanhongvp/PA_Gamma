@@ -29,7 +29,7 @@ namespace ncnn {
 class Command
 {
 public:
-    Command(const VulkanDevice* vkdev, uint32_t queue_family_index);
+    Command(VulkanDevice* vkdev, uint32_t queue_index);
     ~Command();
 
 protected:
@@ -39,11 +39,14 @@ protected:
     // record issue
     int begin_command_buffer();
     int end_command_buffer();
-    int queue_submit_and_wait_fence();
+    int queue_submit();
+    int wait_fence();
 
 protected:
-    const VulkanDevice* vkdev;
-    uint32_t queue_family_index;
+    VulkanDevice* vkdev;
+    uint32_t queue_index;
+
+    VkQueue queue;
 
     VkCommandPool command_pool;
     VkCommandBuffer command_buffer;
@@ -54,8 +57,10 @@ protected:
 class VkCompute : public Command
 {
 public:
-    VkCompute(const VulkanDevice* vkdev);
+    VkCompute(VulkanDevice* vkdev);
     ~VkCompute();
+
+    int begin();
 
     void record_upload(const VkMat& m);
 
@@ -67,11 +72,25 @@ public:
 
     void record_copy_regions(const VkMat& src, const VkMat& dst, const std::vector<VkBufferCopy>& regions);
 
+    void record_transfer_compute_barrier(const VkMat& m);
+
+    void record_compute_transfer_barrier(const VkMat& m);
+
+    void record_compute_compute_barrier(const VkMat& m);
+
+    void record_transfer_transfer_barrier(const VkMat& m);
+
+    void record_prepare_transfer_barrier(const VkMat& m);
+
+    void record_prepare_compute_barrier(const VkMat& m);
+
     void record_pipeline(const Pipeline* pipeline, const std::vector<VkMat>& bindings, const std::vector<vk_constant_type>& constants, const VkMat& m);
 
-    int submit_and_wait();
+    int end();
 
-    int reset();
+    int submit();
+
+    int wait();
 
 protected:
     // record pipeline things
@@ -79,16 +98,6 @@ protected:
     void record_update_bindings(VkPipelineLayout pipeline_layout, VkDescriptorSetLayout descriptorset_layout, VkDescriptorUpdateTemplateKHR descriptor_update_template, const std::vector<VkMat>& bindings);
     void record_push_constants(VkPipelineLayout pipeline_layout, const std::vector<vk_constant_type>& constants);
     void record_dispatch(const uint32_t* group_count_xyz);
-
-    // record barrier things
-    void record_transfer_compute_barrier(const VkMat& m);
-    void record_compute_transfer_barrier(const VkMat& m);
-    void record_compute_compute_barrier(const VkMat& m);
-    void record_transfer_transfer_barrier(const VkMat& m);
-
-    // record prepare things
-    void record_prepare_transfer_barrier(const VkMat& m);
-    void record_prepare_compute_barrier(const VkMat& m);
 
 protected:
     // recording issue
@@ -111,16 +120,18 @@ protected:
     std::vector<VkDescriptorSet> descriptorsets;
     struct record_type
     {
-        // 0=copy
-        // 1=copy regions
-        // 2=bind pipeline
-        // 3=bind descriptorset
-        // 4=push constants
-        // 5=dispatch
-        // 6=transfer-compute barrier
-        // 7=compute-transfer barrier
-        // 8=compute-compute barrier
-        // 9=transfer-transfer barrier
+        // 0=begin
+        // 1=copy
+        // 2=copy regions
+        // 3=bind pipeline
+        // 4=bind descriptorset
+        // 5=push constants
+        // 6=dispatch
+        // 7=transfer-compute barrier
+        // 8=compute-transfer barrier
+        // 9=compute-compute barrier
+        // 10=transfer-transfer barrier
+        // 11=end
         int type;
 
         union
@@ -146,12 +157,16 @@ protected:
 class VkTransfer : public Command
 {
 public:
-    VkTransfer(const VulkanDevice* vkdev);
+    VkTransfer(VulkanDevice* vkdev);
     ~VkTransfer();
 
     void record_upload(const Mat& src, VkMat& dst);
 
-    int submit_and_wait();
+    void record_download(const VkMat& src, Mat& dst);
+
+    int submit();
+
+    int wait();
 
 public:
     VkAllocator* weight_vkallocator;
@@ -163,15 +178,22 @@ protected:
     void copy_buffer_regions(VkBuffer src, VkBuffer dst, const std::vector<VkBufferCopy>& regions);
 
 protected:
-    size_t buffer_offset_alignment;
     VkBufferMemory* staging_data;
 
     // delayed record
     struct record_type
     {
+        // 0=upload
+        // 1=download
+        int type;
+
         size_t size;
-        Mat mat;
-        VkMat vkmat;
+
+        union
+        {
+        struct { void* src; VkBuffer dst; size_t dst_offset; } upload;
+        struct { VkBuffer src; size_t src_offset; void* dst; } download;
+        };
     };
     std::vector<record_type> delayed_records;
 };

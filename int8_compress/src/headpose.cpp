@@ -27,8 +27,8 @@ static int detect_headpose(const cv::Mat& bgr, std::vector<std::vector<float> >&
     ncnn::Net headpose;
 
     std::cout << "Begin to analysis param and model " << std::endl;
-    headpose.load_param("../model_param/headpose-int8.param");
-    headpose.load_model("../model_param/headpose-int8.bin");
+    headpose.load_param("../models/headpose-int8.param");
+    headpose.load_model("../models/headpose-int8.bin");
     // std::cout << "haha" << std::endl;
 
     ncnn::Mat in = ncnn::Mat::from_pixels_resize(bgr.data, ncnn::Mat::PIXEL_BGR, bgr.cols, bgr.rows, 224, 224);
@@ -39,25 +39,24 @@ static int detect_headpose(const cv::Mat& bgr, std::vector<std::vector<float> >&
     ncnn::Extractor ex = headpose.create_extractor();
 
     ex.input("blob1", in);
+    // ex.input("0", in);
 
     std::vector <ncnn::Mat> out;
     ncnn::Mat out1;
     ncnn::Mat out2;
     ncnn::Mat out3;
+    // ex.extract("473", out1);
     ex.extract("fc_blob1", out1);
     out.push_back(out1);
+    // ex.extract("474", out2);
     ex.extract("fc_blob2", out2);
     out.push_back(out2);
+    // ex.extract("475", out3);
     ex.extract("fc_blob3", out3);
     out.push_back(out3);
 
     int hd_angles = 3;
     hdp_scores.resize(hd_angles);
-
-    std::cout << "out height " << out1.h << std::endl;
-    std::cout << "out width " << out1.w << std::endl;
-    std::cout << "out width " << out2.w << std::endl;
-    std::cout << "out width " << out3.w << std::endl;
     
     // hdp_scores[0].resize(out1.h);
     for (int i=0; i<hd_angles; i++) {
@@ -67,7 +66,7 @@ static int detect_headpose(const cv::Mat& bgr, std::vector<std::vector<float> >&
             hdp_scores[i][j] = out[i][j];
             std::cout << out[i][j] << " ";
         }
-        std::cout << std::endl;
+        // std::cout << std::endl;
     }
     std::cout << "Param and model loaded" << std::endl;
     
@@ -79,7 +78,7 @@ static int print_hdpscores(const std::vector<std::vector<float> >& hdp_scores)
     // partial sort topk with index
     int hd_angles = hdp_scores.size();
     int hd_dims = hdp_scores[0].size();
-    std::cout << "xixi" << std::endl;
+    // std::cout << "xixi" << std::endl;
     // print headpose score in hd_angles
     for(int i=0; i<hd_angles; i++) {
         std::cout << "pose " << i << " [";
@@ -113,7 +112,7 @@ int main(int argc, char** argv)
     std::cout << "Begin to detect model " << std::endl;
     detect_headpose(m, hdp_scores);
     
-    std::cout << "print headpose" << std::endl;
+    // std::cout << "print headpose" << std::endl;
     print_hdpscores(hdp_scores);
 
     // return 0;

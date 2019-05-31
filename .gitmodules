@@ -1,0 +1,3 @@
+[submodule "int8_compress/3rdParty/caffe"]
+	path = int8_compress/3rdParty/caffe
+	url = https://github.com/BVLC/caffe.git

@@ -36,5 +36,5 @@
 practice/.vscode/*
 *.zip
 int8_compress/build/**
-int8_compress/test/*
+int8_compress/models/**
 model_param/
